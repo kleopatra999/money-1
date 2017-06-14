@@ -38,6 +38,10 @@ describe "Money" do
     expect(Money.new('3.00')).to eq(Money.new(3.00))
   end
 
+  it "is aware of the currency" do
+    expect(Money.new(1.00, 'CAD').currency.iso_code).to eq('CAD')
+  end
+
   it "is addable" do
     expect((Money.new(1.51) + Money.new(3.49))).to eq(Money.new(5.00))
   end

@@ -6,18 +6,18 @@ class Money
 
   DECIMAL_ZERO = BigDecimal.new(0).freeze
 
-  attr_reader :value, :cents
+  attr_reader :value, :cents, :currency
 
   class << self
-    attr_accessor :parser
+    attr_accessor :parser, :default_currency
     alias_method :from_amount, :new
   end
 
-  def self.new(value = 0, _currency = nil)
+  def self.new(value = 0, currency = nil)
     if value == 0
       @empty ||= super(0)
     else
-      super(value, _currency)
+      super(value, currency)
     end
   end
 
@@ -35,16 +35,21 @@ class Money
 
   def self.settings_defaults
     self.parser = MoneyParser
+    self.default_currency = nil
   end
   settings_defaults
 
-  def initialize(value = 0, _currency = nil)
+  def initialize(value = 0, currency = nil)
     raise ArgumentError if value.respond_to?(:nan?) && value.nan?
-
+    @currency = currency || self.class.default_currency
     @value = value_to_decimal(value).round(2)
     @value = 0.to_d if @value.sign == BigDecimal::SIGN_NEGATIVE_ZERO
     @cents = (@value * 100).to_i
     freeze
+  end
+
+  def currency
+    Currency.new(@currency)
   end
 
   def init_with(coder)
