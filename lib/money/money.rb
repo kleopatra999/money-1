@@ -9,19 +9,36 @@ class Money
   attr_reader :value, :cents
 
   class << self
-    def new(value = 0, _currency = nil)
-      if value == 0
-        @empty ||= super(0)
-      else
-        super(value, _currency)
-      end
-    end
-
-    def empty
-      new(0)
-    end
-
     alias_method :from_amount, :new
+  end
+
+  def self.new(value = 0, _currency = nil)
+    if value == 0
+      @empty ||= super(0)
+    else
+      super(value, _currency)
+    end
+  end
+
+  def self.empty
+    new(0)
+  end
+
+  def self.parse(input)
+    parser.parse(input)
+  end
+
+  # allow parser to be set via dependency injection.
+  def self.parser
+    @@parser ||= MoneyParser
+  end
+
+  def self.parser=(new_parser_class)
+    @@parser = new_parser_class
+  end
+
+  def self.from_cents(cents)
+    new(cents.round.to_f / 100)
   end
 
   def initialize(value = 0, _currency = nil)
@@ -107,23 +124,6 @@ class Money
 
   def hash
     value.hash
-  end
-
-  def self.parse(input)
-    parser.parse(input)
-  end
-
-  # allow parser to be set via dependency injection.
-  def self.parser
-    @@parser ||= MoneyParser
-  end
-
-  def self.parser=(new_parser_class)
-    @@parser = new_parser_class
-  end
-
-  def self.from_cents(cents)
-    Money.new(cents.round.to_f / 100)
   end
 
   def to_money
