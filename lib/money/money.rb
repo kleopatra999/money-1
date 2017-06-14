@@ -9,6 +9,7 @@ class Money
   attr_reader :value, :cents
 
   class << self
+    attr_accessor :parser
     alias_method :from_amount, :new
   end
 
@@ -28,18 +29,14 @@ class Money
     parser.parse(input)
   end
 
-  # allow parser to be set via dependency injection.
-  def self.parser
-    @@parser ||= MoneyParser
-  end
-
-  def self.parser=(new_parser_class)
-    @@parser = new_parser_class
-  end
-
   def self.from_cents(cents)
     new(cents.round.to_f / 100)
   end
+
+  def self.settings_defaults
+    self.parser = MoneyParser
+  end
+  settings_defaults
 
   def initialize(value = 0, _currency = nil)
     raise ArgumentError if value.respond_to?(:nan?) && value.nan?
